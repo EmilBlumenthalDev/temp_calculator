@@ -1,59 +1,55 @@
 package com.temp_calculator;
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
-import java.util.Scanner;
+public class Main extends Application {
+    private TextField celsiusField = new TextField();
+    private Label resultLabel = new Label();
+    private ComboBox<String> conversionDropdown = new ComboBox<>();
+    private double convertedValue;
 
-public class Main {
     public static void main(String[] args) {
+        launch(args);
+    }
+
+    @Override
+    public void start(Stage stage) {
         TemperatureConverter tempc = new TemperatureConverter();
-        Scanner scanner = new Scanner(System.in);
+        celsiusField.setPromptText("Enter Celsius");
 
-        do {
-            System.out.print("Enter temperature value (or type 'exit' to quit): ");
-            String input = scanner.nextLine();
+        conversionDropdown.getItems().addAll("Celsius to Fahrenheit", "Celsius to Kelvin");
+        conversionDropdown.setValue("Celsius to Fahrenheit");
 
-            if (input.equalsIgnoreCase("exit")) {
-                System.out.println("Exiting the program.");
-                break;
-            }
-
+        Button convertButton = new Button("Convert");
+        convertButton.setOnAction(e -> {
             try {
-                double temp = Double.parseDouble(input);
-
-                System.out.println("Choose conversion type:");
-                System.out.println("1: Fahrenheit to Celsius");
-                System.out.println("2: Celsius to Fahrenheit");
-                System.out.println("3: Kelvin to Celsius");
-                System.out.print("Enter choice (1/2/3): ");
-                String choice = scanner.nextLine();
-
-                double result;
-                switch (choice) {
-                    case "1":
-                        result = tempc.fahrenheitToCelcius(temp);
-                        System.out.printf("%.2f Fahrenheit is %.2f Celsius%n", temp, result);
-                        break;
-                    case "2":
-                        result = tempc.celciusToFahrenheit(temp);
-                        System.out.printf("%.2f Celsius is %.2f Fahrenheit%n", temp, result);
-                        break;
-                    case "3":
-                        result = tempc.kelvinToCelcius(temp);
-                        System.out.printf("%.2f Kelvin is %.2f Celsius%n", temp, result);
-                        break;
-                    default:
-                        System.out.println("Invalid choice. Please select 1, 2, or 3.");
-                        continue;
+                double celsius = Double.parseDouble(celsiusField.getText());
+                String selectedConversion = conversionDropdown.getValue();
+                
+                if ("Celsius to Fahrenheit".equals(selectedConversion)) {
+                    convertedValue = tempc.celciusToFahrenheit(celsius);
+                    resultLabel.setText(String.format("%.2f°C = %.2f°F", celsius, convertedValue));
+                } else if ("Celsius to Kelvin".equals(selectedConversion)) {
+                    convertedValue = tempc.celciusToKelvin(celsius);
+                    resultLabel.setText(String.format("%.2f°C = %.2f K", celsius, convertedValue));
                 }
-
-                if (tempc.isExtremeTemperature(result)) {
-                    System.out.println("Warning: The converted temperature is considered extreme!");
-                }
-
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a valid number.");
+            } catch (NumberFormatException ex) {
+                resultLabel.setText("Please enter a valid number");
             }
-        } while (true);
+        });
 
-        scanner.close();
+        Button saveButton = new Button("Save to DB");
+        saveButton.setOnAction(e -> Database.saveTemperature(
+                Double.parseDouble(celsiusField.getText()), convertedValue, resultLabel));
+
+        VBox root = new VBox(10, celsiusField, conversionDropdown, convertButton, resultLabel, saveButton);
+        Scene scene = new Scene(root, 300, 250);
+
+        stage.setTitle("Temperature Converter");
+        stage.setScene(scene);
+        stage.show();
     }
 }
