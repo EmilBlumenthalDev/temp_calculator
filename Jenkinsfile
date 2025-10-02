@@ -1,32 +1,17 @@
 pipeline {
     agent any
-    tools{
+    
+    tools {
         maven 'MAVEN_HOME'
     }
 
     environment {
-        PATH = "/opt/homebrew/bin/docker"
         DOCKERHUB_CREDENTIALS_ID = 'Docker_Hub'
         DOCKER_IMAGE = 'litioner/temp_calculator'
         DOCKER_TAG = '1.2'
     }
 
     stages {
-        stage('Setup Maven') {
-            steps {
-                script {
-                    def mvnHome = tool name: 'MAVEN_HOME', type: 'maven'
-                    env.PATH = "${mvnHome}/bin:${env.PATH}"
-                }
-            }
-        }
-
-        stage('Checkout') {
-            steps {
-                git branch: 'main', url: 'https://github.com/EmilBlumenthalDev/temp_calculator.git'
-            }
-        }
-
         stage('Build') {
             steps {
                 script {
@@ -74,12 +59,10 @@ pipeline {
         }
     }
 
-  post {
-    always {
-        junit(testResults: '**/target/surefire-reports/*.xml', allowEmptyResults: true)
-        jacoco(execPattern: '**/target/jacoco.exec', classPattern: '**/target/classes', sourcePattern: '**/src/main/java', inclusionPattern: '**/*.class', exclusionPattern: '')
+    post {
+        always {
+            junit(testResults: '**/target/surefire-reports/*.xml', allowEmptyResults: true)
+            jacoco(execPattern: '**/target/jacoco.exec', classPattern: '**/target/classes', sourcePattern: '**/src/main/java', inclusionPattern: '**/*.class', exclusionPattern: '')
+        }
     }
-}
-
-
 }
