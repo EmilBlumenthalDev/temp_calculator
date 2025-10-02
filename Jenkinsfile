@@ -1,21 +1,21 @@
 pipeline {
     agent any
     tools{
-        maven 'Maven3'
+        maven 'MAVEN_HOME'
     }
 
     environment {
         PATH = "/opt/homebrew/bin/docker"
         DOCKERHUB_CREDENTIALS_ID = 'Docker_Hub'
         DOCKER_IMAGE = 'litioner/temp_calculator'
-        DOCKER_TAG = '1.1'
+        DOCKER_TAG = '1.2'
     }
 
     stages {
         stage('Setup Maven') {
             steps {
                 script {
-                    def mvnHome = tool name: 'Maven3', type: 'maven'
+                    def mvnHome = tool name: 'MAVEN_HOME', type: 'maven'
                     env.PATH = "${mvnHome}/bin:${env.PATH}"
                 }
             }
